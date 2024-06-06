@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -eEuo pipefail
+
+export PAGER=""
+
+TARGET_DBNAME=$1
+
+psql --dbname "$TARGET_DBNAME" -c "SELECT * FROM pg_stat_activity;"
+
+#TODO: user hardcoded to postgres
+psql --dbname "$TARGET_DBNAME" -c """ \
+ SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'postgres' AND pid <> pg_backend_pid();
+"""
+
+psql --dbname "$TARGET_DBNAME" -c "DROP SCHEMA public CASCADE;"
+psql --dbname "$TARGET_DBNAME" -c "CREATE SCHEMA public"
+
+# psql --dbname "$TARGET_DBNAME" -c "DROP FUNCTION pganalyze.get_column_stats;"
+# psql --dbname "$TARGET_DBNAME" -c "DROP FUNCTION pganalyze.get_stat_replication;"
+# psql --dbname "$TARGET_DBNAME" -c "DROP FUNCTION pganalyze.reset_stat_statements;"
+# psql --dbname "$TARGET_DBNAME" -c "DROP SCHEMA pganalyze;"
+
+pg_dump --format=custom --no-owner --no-acl -Z 9 --dbname "$DATABASE_URL" | pv | pg_restore --format=custom -j1 --no-owner --dbname "$TARGET_DBNAME"
+
+echo ""
+echo "TOOK: ${SECONDS}s"
+echo "DONE"
