@@ -20,6 +20,10 @@ RUN set -eux ; \
   apt-get update ; \
   apt-get install -y postgresql-client-15
 
+RUN set -eux ; \
+  apt-get update ; \
+  apt-get install -y pv
+
 COPY pgmover /usr/local/bin
 COPY entrypoint.sh /
 ENTRYPOINT [ "/entrypoint.sh" ]
