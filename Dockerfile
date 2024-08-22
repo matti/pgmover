@@ -18,7 +18,7 @@ RUN set -eux ; \
 
 RUN set -eux ; \
   apt-get update ; \
-  apt-get install -y postgresql-client-15
+  apt-get install -y postgresql-client-16
 
 RUN set -eux ; \
   apt-get update ; \
